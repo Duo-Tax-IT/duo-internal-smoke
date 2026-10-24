@@ -3,6 +3,7 @@ services:
     build: .
     container_name: duo-internal-smoke
     restart: unless-stopped
+    env_file: .env.backend
     ports:
       - "127.0.0.1:8100:8080"
     mem_limit: 32m
