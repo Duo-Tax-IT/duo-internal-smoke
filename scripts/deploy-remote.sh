@@ -14,12 +14,14 @@ SHORT="${SHA:0:7}"
 BUNDLE="/tmp/$APP-$SHORT.bundle"
 
 [ -f "$BUNDLE" ] || { echo "bundle $BUNDLE missing" >&2; exit 1; }
-if [ ! -d "$DIR/.git" ]; then
-  echo "==> first deploy: cloning into $DIR"
-  git clone -q --no-checkout "$BUNDLE" "$DIR"
+mkdir -p "$DIR"
+cd "$DIR"
+if [ ! -d .git ]; then
+  # init, not clone: the folder may already hold .env.* written by duo-env-write
+  echo "==> first deploy: new repo in $DIR"
+  git init -q
 fi
 
-cd "$DIR"
 echo "==> fetching $SHORT"
 git fetch -q "$BUNDLE" HEAD
 git -c advice.detachedHead=false checkout -q --detach "$SHA"

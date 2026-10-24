@@ -21,5 +21,9 @@ jobs:
         run: apk add --no-cache -q git openssh-client bash
       - name: Ship the commit to the server
         run: git bundle create - HEAD | duo ssh duo-internal -- "cat > /tmp/duo-internal-smoke-$DUO_SHORT_SHA.bundle"
+      - name: App variables (Backend and Frontend in the Secrets tab)
+        run: >-
+          awk 'BEGIN{for(k in ENVIRON) if(k~/^(BACKEND|FRONTEND)__[A-Z]/) printf "%s=%s%c",k,ENVIRON[k],0}'
+          | duo ssh duo-internal -- "duo-env-write duo-internal-smoke"
       - name: Build, start and health check
         run: duo ssh duo-internal -- "APP_SHA=$DUO_SHA bash -s" < scripts/deploy-remote.sh
