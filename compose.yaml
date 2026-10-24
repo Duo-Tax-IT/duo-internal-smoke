@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    container_name: duo-internal-smoke
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8100:8080"
+    mem_limit: 32m
+    memswap_limit: 32m
+    cpus: 0.1
+    pids_limit: 32

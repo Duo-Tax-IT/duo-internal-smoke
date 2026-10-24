@@ -1,0 +1,25 @@
+# Duo Deploy pipeline. Spec: https://github.com/Duo-Tax-IT/duo-deploy/blob/main/docs/pipeline.md
+#
+# Smoke test for the Duo Deploy -> Duo Internal path: ship this commit over SSH,
+# build and start it with Docker Compose, then check /health on the server.
+# The app is not published (127.0.0.1 only), so the health check runs on the box.
+name: duo-internal-smoke
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    only:
+      branches: [main]
+    environment: production
+    image: alpine:3.22
+    timeout: 10m
+    steps:
+      - name: Tools
+        run: apk add --no-cache -q git openssh-client bash
+      - name: Ship the commit to the server
+        run: git bundle create - HEAD | duo ssh duo-internal -- "cat > /tmp/duo-internal-smoke-$DUO_SHORT_SHA.bundle"
+      - name: Build, start and health check
+        run: duo ssh duo-internal -- "APP_SHA=$DUO_SHA bash -s" < scripts/deploy-remote.sh
